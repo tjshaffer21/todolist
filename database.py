@@ -4,22 +4,22 @@ class Database(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def create_database(self, database_name):
+    def create(self, database_name):
         """Create the database and set it up."""
         return
 
     @abc.abstractmethod
-    def open_database(self, path):
+    def open(self, path):
         """Open the database."""
         return
 
     @abc.abstractmethod
-    def close_database(self):
+    def close(self):
         """Close the database"""
         return
 
     @abc.abstractmethod
-    def add_entry(self, comp_date, entry, priority):
+    def add(self, comp_date, entry, priority):
         """Create an entry in the database."""
         return
 
@@ -39,7 +39,7 @@ class Database(object):
         return
 
     @abc.abstractmethod
-    def delete_entry(self, ident):
+    def delete(self, ident):
         """Delete the entry"""
         return
 
