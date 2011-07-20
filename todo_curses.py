@@ -21,8 +21,6 @@ def create_window(height, width, starty, startx):
             Returns the window."""
     
     window = curses.newwin(height, width, starty, startx)
-    window.box(0,0)
-
     window.refresh()
 
     return window
@@ -43,10 +41,12 @@ def destroy_window(window):
     del window
 
 def printwin(window, x, y, data):
+    """ Print to specified window coordinates. """
     window.addstr(y,x,data)
     window.refresh()
 
 def clearwin(window, startx, starty):
+    """ Clear the specified window starting at specified (x,y) """
     y,x = window.getmaxyx()
 
     for i in range(startx, x-1):
@@ -54,6 +54,7 @@ def clearwin(window, startx, starty):
             window.addstr(j,i," ")
 
 def parse(inpt):
+    """ Parse input string. """
     inpt = inpt.strip()
 
     if inpt == "quit":
@@ -63,6 +64,7 @@ def parse(inpt):
 
 
 def main():
+    # Set up
     locale.setlocale(locale.LC_ALL, '')
     code = locale.getpreferredencoding()
 
@@ -79,21 +81,19 @@ def main():
     display = create_window(y-2,x,0,0)
     prompt  = create_window(2,x,y-2,0)
 
-    screen.refresh()
-
-    prompt.addstr(0,0, "> ")
-    prompt.refresh()
+    printwin(prompt, 0,0, "> ")
+    #End setup.
 
     inpt = prompt.getstr()
     val  = parse(inpt)
     while val != -1:
         printwin(display, 0, 0, inpt)
-
-
+        
         clearwin(prompt, 2, 0)
         inpt = prompt.getstr(0,2)
         val  = parse(inpt)
 
+    # Clean up.
     destroy_window(display)
     destroy_window(prompt)
 
