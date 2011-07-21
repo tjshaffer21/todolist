@@ -61,7 +61,6 @@ def add(lst):
             List of lists containing (key,val) pair."""
     
     global _db
-    global TEMPDISPLAY
 
     entry    = ""
     due      = ""
@@ -78,8 +77,7 @@ def add(lst):
         elif i[0] == "priority":
             priority = i[1]
 
-    printwin(TEMPDISPLAY,10,10,entry)
-    return #_db.add(due, entry, priority)
+    return _db.add(due, entry, priority)
 
 def get(lst):
     """ Get all entries that fit user criteria.
@@ -125,11 +123,7 @@ def parse(inpt):
 
         return 1,get(lst)
     elif cmd == "add":
-        lst = []
-        for i in inpt_list:
-            keyvalpair = i.split("=")
-            lst.append(keyvalpair)
-        
+        lst = re.findall(' (.*?)="(.*?)"', inpt)
         return 2,add(lst)
     elif cmd == "delete":
         return 3,[]
