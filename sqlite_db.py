@@ -1,4 +1,5 @@
 import abc
+import string
 from database import Database
 import sqlite3
 
@@ -57,6 +58,52 @@ class SQLite(Database):
         self._db = None
 
         return True
+    
+    def get_prepare(self, lst):
+        """ Prepare the get statement to send to the get method. """
+
+        statement = ""
+        if lst[0][0] == "all":
+            statement = "SELECT * FROM todo"
+        else:
+            statement = "SELECT * FROM todo WHERE "
+            i = 0
+            while i < len(lst):
+                if lst[i][0] == "priority":
+                    statement += "priority=\'" + lst[i][1] + "\'"
+                elif lst[i][0] == "due":
+                    time = lst[i][1].lstrip('"')
+                    time = time.rstrip('"')
+
+                    statement += "completion_date LIKE \'" + time + "%\'"
+                elif lst[i][0] == "start":
+                    time = lst[i][1].lstrip('"')
+                    time = time.rstrip('"')
+
+                    statement += "creation_date LIKE \'" + time + "%\'" 
+                elif lst[i][0] == "id":
+                    statement += "id=" + lst[i][1]
+                elif lst[i][0] == "completed":
+                    statement += "completed=\'" + lst[i][1] + "\'"
+
+                if i < len(lst)-1:
+                    statement += " and "
+
+                i += 1
+        return statement
+
+    def get(self, statement):
+        if self._db == None:
+            return ""
+
+        cur = self._db.cursor()
+        try:
+            cur.execute(statement)
+        except sqlite3.Error, e:
+            print "An error was encountered: ", e.args[0]
+            return ""
+
+        return cur.fetchall()
 
     def add(self, comp_date, entry, priority):
         """ Add an entry into the database.
@@ -67,26 +114,28 @@ class SQLite(Database):
             Postconditions:
                 Returns True if successful, else False."""
         
-        if self._db != None:
-            cur = self._db.cursor()
+        if self._db == None:
+            return False
+        
+        cur = self._db.cursor()
 
-            cur.execute('''SELECT id FROM todo ORDER BY rowid 
+        cur.execute('''SELECT id FROM todo ORDER BY rowid 
                         DESC LIMIT 1;''')
             
-            lastrowid = cur.fetchone()
-            ident     = int(lastrowid[0]) + 1 
-            statement = '''INSERT INTO todo (id, creation_date,
-                        completion_date, entry, priority, completed)
-                        VALUES (''' + str(ident) + ''', datetime(\'now\'),
-                        \"''' + comp_date + '''\",\"''' + entry + '''\",
-                        \"''' + priority + '''\", "F");'''
+        lastrowid = cur.fetchone()
+        ident     = int(lastrowid[0]) + 1 
+        statement = '''INSERT INTO todo (id, creation_date,
+                    completion_date, entry, priority, completed)
+                    VALUES (''' + str(ident) + ''', datetime(\'now\'),
+                    \"''' + comp_date + '''\",\"''' + entry + '''\",
+                    \"''' + priority + '''\", "F");'''
 
-            try:
-                cur.execute(statement) 
-                self._db.commit()
-            except sqlite3.Error, e:
-                print "An error was encountered: ", e.args[0]
-                return False
+        try:
+            cur.execute(statement) 
+            self._db.commit()
+        except sqlite3.Error, e:
+            print "An error was encountered: ", e.args[0]
+            return False
         
         return True 
 
