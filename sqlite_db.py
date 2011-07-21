@@ -123,7 +123,12 @@ class SQLite(Database):
                         DESC LIMIT 1;''')
             
         lastrowid = cur.fetchone()
-        ident     = int(lastrowid[0]) + 1 
+
+        if lastrowid == None:
+            ident = 1
+        else:
+            ident     = int(lastrowid[0]) + 1 
+        
         statement = '''INSERT INTO todo (id, creation_date,
                     completion_date, entry, priority, completed)
                     VALUES (''' + str(ident) + ''', datetime(\'now\'),

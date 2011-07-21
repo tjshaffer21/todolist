@@ -87,7 +87,6 @@ def add(lst):
             List of lists containing (key,val) pair."""
     
     global _db
-
     entry    = ""
     due      = ""
     priority = ""
@@ -113,6 +112,10 @@ def delete(lst):
     if len(lst) == 0:
         return False
 
+    if len(lst) == 1 and lst[0][0] == "all":
+        return _db.purge() 
+    
+    # First check if id was supplied
     for i in lst:
         if i[0] == "id":
             ident = int(i[1])
@@ -122,7 +125,7 @@ def delete(lst):
         statement = _db.get_prepare(lst)
         rws       = _db.get(statement)
         ident     = rws[0][0]
-
+    
     return _db.delete(ident)
     
 
@@ -156,8 +159,8 @@ def parse(inpt):
              1 : view
              2 : add
              3 : delete
+             4 : edit
              List of key/value lists"""
-
     inpt_list = inpt.strip().split()
     
     cmd = inpt_list.pop(0).lower()
@@ -178,8 +181,18 @@ def parse(inpt):
         # TODO: Check for no values
         return 2,add(lst)
     elif cmd == "delete":
-        lst = re.findall(' (.*?)="(.*?)"', inpt)
+        lst = []
+        if len(inpt_list) == 1 and inpt_list[0].lower() == "all":
+            lst.append(["all"])
+        else:
+            reg = re.findall(' (.*?)="(.*?)"', inpt)
+            for i in reg:
+                arr = [i[0], i[1]]
+                lst.append(arr)
+        
         return 3,delete(lst)
+    elif cmd == "edit":
+        return 4,[]
     elif cmd == "help":
         return 0, printhelp()
 
@@ -189,6 +202,7 @@ def parse(inpt):
 def main():
     global TEMPDISPLAY # TODO: delete
     global _db
+
     # Set up
     locale.setlocale(locale.LC_ALL, '')
     code = locale.getpreferredencoding()
@@ -212,10 +226,10 @@ def main():
     inpt      = prompt.getstr()
     val,data  = parse(inpt)
     while val != -1:
-        if val == 0:
+        if val == 0 or val == 1:
             printwin(display,0,0,data)
-        elif val == 1:
-            printwin(display,0,0, data)
+        elif val > 1:
+            printwin(display,0,0,view([["all"]]))
 
         clearwin(display, 0, 0)
         clearwin(prompt, 2, 0)
@@ -226,7 +240,7 @@ def main():
     destroy_window(display)
     destroy_window(prompt)
 
-    restorescreen()
+    #restorescreen()
     _db.close()
 
 def restorescreen():
@@ -235,8 +249,8 @@ def restorescreen():
     curses.endwin()
 
 if __name__ == '__main__':
-    try:
-        main()
-    except:
-        restorescreen()
-        traceback.print_exc()
+    main()
+    #try:
+    #    main()
+    #except:
+    #    restorescreen()
