@@ -226,9 +226,17 @@ def main():
     destroy_window(display)
     destroy_window(prompt)
 
-    curses.endwin()
+    restorescreen()
     _db.close()
 
+def restorescreen():
+    curses.nocbreak()
+    curses.echo()
+    curses.endwin()
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        restorescreen()
+        traceback.print_exc()
