@@ -220,19 +220,22 @@ def main():
     display = create_window(y-2,x,0,0)
     prompt  = create_window(2,x,y-2,0)
     TEMPDISPLAY = display # TODO: delete
+    
+    printwin(display, 0,0, view([["all"]]))
     printwin(prompt, 0,0, "> ")
     #End setup.
 
     inpt      = prompt.getstr()
     val,data  = parse(inpt)
     while val != -1:
+        clearwin(display, 0, 0)
+        clearwin(prompt, 2, 0)
+        
         if val == 0 or val == 1:
             printwin(display,0,0,data)
         elif val > 1:
             printwin(display,0,0,view([["all"]]))
 
-        clearwin(display, 0, 0)
-        clearwin(prompt, 2, 0)
         inpt = prompt.getstr(0,2)
         val,data  = parse(inpt)
 
